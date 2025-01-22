@@ -183,7 +183,5 @@ Executor Plus is licensed under the GNU Lesser General Public License (LGPL) v2.
 ## Future Roadmap
 
 - **Picklable Executors**: Allow executors to be serialized and passed across processes.
-- **Advanced Metrics**: Collect and expose detailed statistics on task execution.
-- **Resource Management Addons**: Introduce addons for managing shared resources (e.g., memory, disk I/O).
 
 ---
