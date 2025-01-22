@@ -3,20 +3,17 @@ name: Publish to PyPI
 on:
   push:
     tags:
-      - 'v*'         # For stable releases
-      - 'v*-beta.*'  # For beta releases
+      - 'v*'
+      - 'v*-beta.*'
 
 jobs:
   build:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        python-version: ["3.8", "3.9", "3.10", "3.11"]  # List all supported Python versions
     steps:
     - uses: actions/checkout@v3
     - uses: actions/setup-python@v4
       with:
-        python-version: ${{ matrix.python-version }}
+        python-version: 3.8
     - run: pip install build twine
     - run: python -m build
     - run: twine upload dist/* --username __token__ --password ${{ secrets.PYPI_API_TOKEN }}

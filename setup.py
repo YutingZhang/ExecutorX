@@ -14,7 +14,7 @@ setup(
     name="executor_plus",
     version=version["__version__"],  # Dynamically loaded version
     author="Yuting Zhang",
-    author_email="your_email@example.com",
+    author_email="opensource@yuting.link",
     description="An advanced executor library for Python with progress tracking, throttling, and more.",
     long_description=long_description,
     long_description_content_type="text/markdown",
