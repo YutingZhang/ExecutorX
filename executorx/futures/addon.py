@@ -16,6 +16,9 @@ class PoolExecutorAddon:
         from .executors import PoolExecutor
         self.executor: Optional[ProxyType[PoolExecutor]] = None
 
+    def pre_start(self) -> None:
+        pass
+
     def on_start(self) -> None:
         pass
 
@@ -30,4 +33,14 @@ class PoolExecutorAddon:
 
     def after_join(self) -> None:
         pass
+
+    def __getstate__(self):
+        state = {k: v for k, v in self.__dict__.items() if k != 'executor'}
+        state['executor'] = None
+        return state
+
+    def __setstate__(self, state):
+        state = state.copy()
+        state['executor'] = None
+        self.__dict__.update(state)
 

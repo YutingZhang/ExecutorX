@@ -102,6 +102,11 @@ class PoolExecutor(cf.Executor):
             addons: _ADDON_ARG_TYPE_HINT = None,
             **kwargs,
     ):
+
+        self._max_workers = max_workers if max_workers is not None and max_workers >= 0 else mp.cpu_count()
+        self.initializer = initializer
+        self.thread_instead_of_process = thread_instead_of_process
+
         if addons is None:
             addons = []
         elif isinstance(addons, PoolExecutorAddon) or inspect.isclass(addons):
@@ -111,7 +116,10 @@ class PoolExecutor(cf.Executor):
         )
         self.addons: List[PoolExecutorAddon] = addons
 
-        self._max_workers = max_workers if max_workers is not None else mp.cpu_count()
+        for ao in self.addons:
+            ao.executor = weakref.proxy(self)
+            ao.pre_start()
+
         self._task_tracker = _TaskTracker()
         self._submit_lock = threading.Lock()
 
@@ -127,10 +135,8 @@ class PoolExecutor(cf.Executor):
             **kwargs
         )
 
-        if addons:
-            for ao in addons:
-                ao.executor = weakref.proxy(self)
-                ao.on_start()
+        for ao in self.addons:
+            ao.on_start()
 
     @property
     def max_workers(self) -> int:
