@@ -3,7 +3,7 @@
 
 __author__ = ['Yuting Zhang']
 
-import threading
+from .. import threading
 from concurrent.futures import Future
 import concurrent.futures as cf
 from typing import Optional

@@ -2,7 +2,7 @@
 # This file is part of ExecutorX, licensed under the GNU Lesser General Public License V2.1.
 
 from concurrent.futures import Future
-import threading
+from .. import threading
 from typing import Union
 from ..futures.addon import PoolExecutorAddon
 

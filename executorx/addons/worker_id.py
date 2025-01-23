@@ -11,7 +11,7 @@ __all__ = [
 
 import multiprocessing
 import os
-import threading
+from .. import threading
 from ..futures.addon import PoolExecutorAddon
 
 _worker_ids = dict()

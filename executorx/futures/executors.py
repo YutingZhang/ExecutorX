@@ -8,7 +8,7 @@ import concurrent.futures as cf
 import functools
 import inspect
 import multiprocessing as mp
-import threading
+from .. import threading
 from typing import Union, Optional, Iterable, Callable, List, Dict, Type
 import weakref
 from .addon import PoolExecutorAddon
@@ -175,8 +175,8 @@ class PoolExecutor(cf.Executor):
     def map(self, fn, *iterables, timeout=None, chunksize=1):
         return self._basic_executor.map(fn, *iterables, timeout=timeout, chunksize=chunksize)
 
-    def shutdown(self, wait=True, *, cancel_futures=False):
-        rt = self._basic_executor.shutdown(wait=True, cancel_futures=cancel_futures)
+    def shutdown(self, wait=True, **kwargs):
+        rt = self._basic_executor.shutdown(wait=True, **kwargs)
         self.join()
         return rt
 
