@@ -138,10 +138,10 @@ from executorx.futures.addon import PoolExecutorAddon
 
 
 class MyCustomAddon(PoolExecutorAddon):
-    def pre_submit(self):
+    def before_submit(self):
         print("Preparing to submit task")
 
-    def post_submit(self, future):
+    def after_submit(self, future):
         print("Task submitted")
 
 

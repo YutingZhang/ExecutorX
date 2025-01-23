@@ -63,7 +63,7 @@ class _TaskTracker:
         with self.op_rlock:
             return len(self.pending_futures)
 
-    def post_submit(self, future: cf.Future):
+    def after_submit(self, future: cf.Future):
         with self.op_rlock:
             self.joined_lock.acquire(blocking=False)
             task_id = self.total_task_count
@@ -118,7 +118,7 @@ class PoolExecutor(cf.Executor):
 
         for ao in self.addons:
             ao.executor = weakref.proxy(self)
-            ao.pre_start()
+            ao.before_start()
 
         self._task_tracker = _TaskTracker()
         self._submit_lock = threading.Lock()
@@ -168,11 +168,11 @@ class PoolExecutor(cf.Executor):
     def submit(self, fn: Callable, /, *args, **kwargs) -> cf.Future:
         with self._submit_lock:
             for ao in self.addons:
-                ao.pre_submit()
+                ao.before_submit()
             f = self._basic_executor.submit(fn, *args, **kwargs)
-            self._task_tracker.post_submit(f)
+            self._task_tracker.after_submit(f)
             for ao in self.addons[::-1]:
-                ao.post_submit(f)
+                ao.after_submit(f)
             return f
 
     def basic_submit(self, fn: Callable, /, *args, **kwargs) -> cf.Future:
@@ -187,8 +187,10 @@ class PoolExecutor(cf.Executor):
         return rt
 
     def join(self, timeout=None):
+        for ao in self.addons:
+            ao.before_join()
         self._task_tracker.join(timeout=timeout)
-        for ao in self.addons[::-1]:
+        for ao in self.addons:
             ao.after_join()
 
     def __enter__(self):

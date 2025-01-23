@@ -31,11 +31,13 @@ class Progress(PoolExecutorAddon):
         self.reset_at_join = reset_at_join
         self.op_rlock = threading.RLock()
         self.reset(num_tasks=num_tasks, desc=desc)
+        self.submitted_num_tasks = 0
 
     def reset(self, num_tasks: Optional[int] = None, desc: Optional[str] = None):
         if hasattr(self, '_pbar') and self._pbar is not None:
             self._pbar.close()
         with self.op_rlock:
+            self.submitted_num_tasks = 0
             self.num_tasks = num_tasks
             self.done_tasks = 0
             self.complete_tasks = 0
@@ -72,9 +74,6 @@ class Progress(PoolExecutorAddon):
             self.pbar.set_postfix(additional_info)
         self.pbar.update(1)
 
-    def post_submit(self, future: Future) -> None:
-        future.add_done_callback(self.task_done_callback)
-
     def on_start(self) -> None:
 
         if not self.show_title:
@@ -94,6 +93,15 @@ class Progress(PoolExecutorAddon):
         else:
             title += 'with an executor'
         print(title, flush=True)
+
+    def after_submit(self, future: Future) -> None:
+        future.add_done_callback(self.task_done_callback)
+        self.submitted_num_tasks += 1
+
+    def before_join(self) -> None:
+        if not self.num_tasks:
+            self.pbar.total = self.submitted_num_tasks
+            self.pbar.refresh()
 
     def after_join(self) -> None:
         if (

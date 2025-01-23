@@ -23,11 +23,11 @@ class Throttle(PoolExecutorAddon):
             if self.executor.pending_task_count < self.buffer_size and not self.throttle_lock.acquire(blocking=False):
                 self.throttle_lock.release()
 
-    def pre_submit(self) -> None:
+    def before_submit(self) -> None:
         with self.throttle_lock:
             pass
 
-    def post_submit(self, future: Future) -> None:
+    def after_submit(self, future: Future) -> None:
         with self.executor.task_op_rlock:
             if self.executor.pending_task_count >= self.buffer_size:
                 self.throttle_lock.acquire(blocking=False)

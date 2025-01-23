@@ -16,7 +16,7 @@ class PoolExecutorAddon:
         from .executors import PoolExecutor
         self.executor: Optional[ProxyType[PoolExecutor]] = None
 
-    def pre_start(self) -> None:
+    def before_start(self) -> None:
         pass
 
     def on_start(self) -> None:
@@ -25,10 +25,13 @@ class PoolExecutorAddon:
     def initializer(self) -> None:
         pass
 
-    def pre_submit(self) -> None:
+    def before_submit(self) -> None:
         pass
 
-    def post_submit(self, future: Future) -> None:
+    def after_submit(self, future: Future) -> None:
+        pass
+
+    def before_join(self) -> None:
         pass
 
     def after_join(self) -> None:
