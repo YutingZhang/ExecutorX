@@ -39,5 +39,6 @@ class Throttle(ResetAtPickleClassWrapper):
     def __init__(
             self,
             buffer_size: Union[int, None] = None,
+            *args, **kwargs
     ):
-        super().__init__(_Throttle, buffer_size)
+        super().__init__(_Throttle, buffer_size, *args, **kwargs)
