@@ -34,7 +34,10 @@ class WorkerId(PoolExecutorAddon):
         super().__init__()
         self._lock = multiprocessing.Lock()
         self._counter = multiprocessing.Value('i', 0)
-        self.multi_workers = self.executor.max_workers > 0
+
+    @property
+    def multi_workers(self) -> bool:
+        return self.executor.max_workers > 0
 
     @property
     def total_started_workers(self) -> int:
