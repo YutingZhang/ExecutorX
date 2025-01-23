@@ -11,6 +11,7 @@ __all__ = [
 
 from .utils import ResetAtPickleClassWrapper
 import threading
+from threading import *
 
 
 class RLock(ResetAtPickleClassWrapper):

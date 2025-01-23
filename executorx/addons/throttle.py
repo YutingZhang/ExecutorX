@@ -3,11 +3,12 @@
 
 from concurrent.futures import Future
 from .. import threading
+from ..utils import ResetAtPickleClassWrapper
 from typing import Union
 from ..futures.addon import PoolExecutorAddon
 
 
-class Throttle(PoolExecutorAddon):
+class _Throttle(PoolExecutorAddon):
     def __init__(
             self,
             buffer_size: Union[int, None],
@@ -32,3 +33,11 @@ class Throttle(PoolExecutorAddon):
             if self.executor.pending_task_count >= self.buffer_size:
                 self.throttle_lock.acquire(blocking=False)
         future.add_done_callback(self.task_done_callback)
+
+
+class Throttle(ResetAtPickleClassWrapper):
+    def __init__(
+            self,
+            buffer_size: Union[int, None] = None,
+    ):
+        super().__init__(_Throttle, buffer_size)
