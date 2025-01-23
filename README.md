@@ -1,9 +1,9 @@
 
-# Executor Plus
+# ExecutorX
 
 [![License](https://img.shields.io/badge/License-LGPLv2.1-blue.svg)](LICENSE)
 
-**Executor Plus** is an advanced executor library for Python that extends `concurrent.futures.Executor` with new capabilities, including task progress tracking, submission throttling, modular lifecycle hooks, and improved support for worker initialization. Whether you're running CPU-bound tasks in processes, IO-bound tasks in threads, or debugging in the main thread, **Executor Plus** makes parallelism more flexible and powerful.
+**ExecutorX** is an advanced executor library for Python that extends `concurrent.futures.Executor` with new capabilities, including task progress tracking, submission throttling, modular lifecycle hooks, and improved support for worker initialization. Whether you're running CPU-bound tasks in processes, IO-bound tasks in threads, or debugging in the main thread, **ExecutorX** makes parallelism more flexible and powerful.
 
 ---
 
@@ -149,7 +149,7 @@ class MyCustomAddon(PoolExecutorAddon):
 from executorx.futures.executors import ThreadPoolExecutor
 
 executor = ThreadPoolExecutor(max_workers=4, addons=[MyCustomAddon])
-executor.submit(print, "Hello from Executor Plus!")
+executor.submit(print, "Hello from ExecutorX!")
 executor.shutdown()
 ```
 
@@ -184,7 +184,7 @@ Contributions are welcome! To get started:
 
 ## License
 
-Executor Plus is licensed under the GNU Lesser General Public License (LGPL) v2.1. See the [LICENSE](LICENSE) file for details.
+ExecutorX is licensed under the GNU Lesser General Public License (LGPL) v2.1. See the [LICENSE](LICENSE) file for details.
 
 ---
 
