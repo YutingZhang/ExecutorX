@@ -33,7 +33,7 @@
 ## Installation
 
 ```bash
-pip install executor_plus
+pip install executorx
 ```
 
 ---
@@ -43,11 +43,13 @@ pip install executor_plus
 ### Process Pool with Progress Tracking
 
 ```python
-from executor_plus.addons.progress import ProgressAddon
-from executor_plus.futures.executors import ProcessPoolExecutor
+from executorx.addons.progress import ProgressAddon
+from executorx.futures.executors import ProcessPoolExecutor
+
 
 def my_function(x):
     return x * x
+
 
 # Initialize a process pool with progress tracking
 executor = ProcessPoolExecutor(max_workers=4, addons=[ProgressAddon])
@@ -67,11 +69,13 @@ executor.shutdown()
 The `ImmediateExecutor` runs all tasks in the main thread synchronously. This is useful for debugging or environments where parallelism isn't required.
 
 ```python
-from executor_plus.futures.executors import ImmediateExecutor
+from executorx.futures.executors import ImmediateExecutor
+
 
 def debug_task(x):
     print(f"Processing {x} in the main thread")
     return x * x
+
 
 executor = ImmediateExecutor()
 
@@ -90,8 +94,8 @@ executor.shutdown()
 Control the number of concurrent or submitted tasks using the `ThrottleAddon`.
 
 ```python
-from executor_plus.addons.throttle import ThrottleAddon
-from executor_plus.futures.executors import ThreadPoolExecutor
+from executorx.addons.throttle import ThrottleAddon
+from executorx.futures.executors import ThreadPoolExecutor
 
 executor = ThreadPoolExecutor(
     max_workers=4, addons=[ThrottleAddon(max_concurrent_tasks=2)]
@@ -108,10 +112,12 @@ executor.shutdown()
 Set up custom initialization logic for workers, such as loading shared resources.
 
 ```python
-from executor_plus.futures.executors import ProcessPoolExecutor
+from executorx.futures.executors import ProcessPoolExecutor
+
 
 def initialize_worker():
     print("Initializing worker...")
+
 
 executor = ProcessPoolExecutor(max_workers=4, initializer=initialize_worker)
 
@@ -128,7 +134,8 @@ Addons provide modular hooks into the executor lifecycle, allowing custom logic 
 ### Creating a Custom Addon
 
 ```python
-from executor_plus.futures.addon import PoolExecutorAddon
+from executorx.futures.addon import PoolExecutorAddon
+
 
 class MyCustomAddon(PoolExecutorAddon):
     def pre_submit(self):
@@ -137,8 +144,9 @@ class MyCustomAddon(PoolExecutorAddon):
     def post_submit(self, future):
         print("Task submitted")
 
+
 # Use the addon
-from executor_plus.futures.executors import ThreadPoolExecutor
+from executorx.futures.executors import ThreadPoolExecutor
 
 executor = ThreadPoolExecutor(max_workers=4, addons=[MyCustomAddon])
 executor.submit(print, "Hello from Executor Plus!")
