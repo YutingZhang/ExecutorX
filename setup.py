@@ -31,5 +31,7 @@ setup(
         "Operating System :: OS Independent",
     ],
     python_requires=">=3.8",
-    install_requires=parse_requirements("requirements.txt"),  # Load dependencies dynamically
+    install_requires=parse_requirements(
+        os.path.join(os.path.dirname(os.path.abspath(__file__)), "requirements.txt")
+    ),  # Load dependencies dynamically
 )
