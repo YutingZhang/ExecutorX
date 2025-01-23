@@ -5,7 +5,7 @@ __author__ = ['Yuting Zhang']
 
 __all__ = [
     'timeout_context_for_lock',
-    'ResetAtPickleObjectWrapper',
+    'ResetAtPickleClassWrapper',
 ]
 
 import contextlib
@@ -14,7 +14,7 @@ import threading
 import typing
 
 
-class ResetAtPickleObjectWrapper:
+class ResetAtPickleClassWrapper:
     """
     A wrapper class that lazily initializes an object and resets its state during pickling.
 
@@ -42,8 +42,16 @@ class ResetAtPickleObjectWrapper:
         self._cls = args[0]
         self._args = args[1:]
         self._kwargs = kwargs
-        self._obj = None
+        self._obj_holder = [None]
         self._initialized = True
+
+    @property
+    def _obj(self):
+        return self._obj_holder[0]
+
+    def _initialize_if_needed(self):
+        if self._obj is None:
+            self._obj_holder[0] = self._cls(*self._args, **self._kwargs)
 
     def __getattr__(self, item):
         """
@@ -60,8 +68,7 @@ class ResetAtPickleObjectWrapper:
         """
         if '_initialized' not in self.__dict__ or not self._initialized:
             raise AttributeError(f"'{type(self).__name__}' object has no attribute '{item}'")
-        if self._obj is None:
-            self._obj = self._cls(*self._args, **self._kwargs)
+        self._initialize_if_needed()
         return getattr(self._obj, item)
 
     def __setattr__(self, name, value):
@@ -75,8 +82,7 @@ class ResetAtPickleObjectWrapper:
         if '_initialized' not in self.__dict__ or not self._initialized:
             super().__setattr__(name, value)
             return
-        if self._obj is None:
-            self._obj = self._cls(*self._args, **self._kwargs)
+        self._initialize_if_needed()
         setattr(self._obj, name, value)
 
     def __getstate__(self):
@@ -86,8 +92,7 @@ class ResetAtPickleObjectWrapper:
         Returns:
             dict: A dictionary representing the state of the wrapper, with the wrapped object reset to None.
         """
-        state = self.__dict__.copy()
-        state['_obj'] = None
+        state = {k: v for k, v in self.__dict__.items() if k in {'_cls', '_args', '_kwargs'}}
         return state
 
     def __setstate__(self, state):
@@ -98,7 +103,8 @@ class ResetAtPickleObjectWrapper:
             state (dict): A dictionary representing the state of the wrapper.
         """
         self.__dict__.update(state)
-        self._obj = None
+        self._obj_holder = [None]
+        self._initialized = True
 
 
 @contextlib.contextmanager

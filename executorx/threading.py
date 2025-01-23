@@ -9,15 +9,29 @@ __all__ = [
 ]
 
 
-from .utils import ResetAtPickleObjectWrapper
+from .utils import ResetAtPickleClassWrapper
 import threading
 
 
-class RLock(ResetAtPickleObjectWrapper):
+class RLock(ResetAtPickleClassWrapper):
     def __init__(self, *args, **kwargs):
         super().__init__(threading.RLock, *args, **kwargs)
 
+    def __enter__(self):
+        self._initialize_if_needed()
+        return self._obj.__enter__()
 
-class Lock(ResetAtPickleObjectWrapper):
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        return self._obj.__exit__(exc_type, exc_val, exc_tb)
+
+
+class Lock(ResetAtPickleClassWrapper):
     def __init__(self, *args, **kwargs):
         super().__init__(threading.Lock, *args, **kwargs)
+
+    def __enter__(self):
+        self._initialize_if_needed()
+        return self._obj.__enter__()
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        return self._obj.__exit__(exc_type, exc_val, exc_tb)
