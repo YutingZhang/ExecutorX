@@ -3,15 +3,18 @@
 
 __author__ = ['Yuting Zhang']
 
+__all__ = ['Progress']
+
 from .. import threading
 from concurrent.futures import Future
 import concurrent.futures as cf
 from typing import Optional
 from ..futures.addon import PoolExecutorAddon
 from ..futures.executors import BasicImmediateExecutor
+from ..utils import ResetAtPickleClassWrapper
 
 
-class Progress(PoolExecutorAddon):
+class _Progress(PoolExecutorAddon):
     def __init__(
             self,
             num_tasks: Optional[int] = None,
@@ -99,3 +102,15 @@ class Progress(PoolExecutorAddon):
                 hasattr(self, '_pbar') and self._pbar is not None
         ):
             self.reset()
+
+
+class Progress(ResetAtPickleClassWrapper):
+    def __init__(
+            self,
+            num_tasks: Optional[int] = None,
+            desc: Optional[str] = None,
+            reset_at_join: bool = True,
+            show_title: bool = True,
+            *args, **kwargs
+    ):
+        super().__init__(_Progress, num_tasks, desc, reset_at_join, show_title, *args, **kwargs)
