@@ -66,7 +66,8 @@ class _TaskTracker:
     def post_submit(self, future: cf.Future):
         with self.op_rlock:
             self.joined_lock.acquire(blocking=False)
-            self.pending_futures[task_id := self.total_task_count] = future
+            task_id = self.total_task_count
+            self.pending_futures[task_id] = future
             self.total_task_count += 1
         # do not put the add_done_callback in the op_rlock context
         # when the task is done fast, the done callback may be triggered right away,
