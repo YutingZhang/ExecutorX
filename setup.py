@@ -1,7 +1,7 @@
 import os
 from setuptools import setup, find_packages
 
-# Read the version from executorx/__version__.py
+# Read the version from ExecutorX/__version__.py
 version = {}
 with open(os.path.join("executorx", "__version__.py")) as fp:
     exec(fp.read(), version)
@@ -11,7 +11,7 @@ with open("README.md", "r", encoding="utf-8") as fh:
     long_description = fh.read()
 
 setup(
-    name="executorx",
+    name="ExecutorX",
     version=version["__version__"],  # Dynamically loaded version
     author="Yuting Zhang",
     author_email="opensource@yuting.link",

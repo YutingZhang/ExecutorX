@@ -33,7 +33,7 @@
 ## Installation
 
 ```bash
-pip install executorx
+pip install ExecutorX
 ```
 
 ---
