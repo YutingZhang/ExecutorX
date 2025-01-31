@@ -24,6 +24,7 @@ def start_all_workers(executor: PoolExecutor):
         manager.start()
         barrier = manager.Barrier(max_workers)
     else:
+        # FIXME: this may be problematic if some workers are started already
         manager = None
         barrier = mp.Barrier(max_workers)
     all_tasks = {executor.basic_submit(_start_barrier, barrier) for _ in range(max_workers)}
