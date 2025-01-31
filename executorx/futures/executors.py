@@ -7,6 +7,7 @@ __author__ = ['Yuting Zhang']
 import concurrent.futures as cf
 import functools
 import inspect
+import math
 import multiprocessing as mp
 from collections import deque
 
@@ -25,13 +26,21 @@ __all__ = [
 ]
 
 
+def canonicalize_max_workers(max_workers):
+    if max_workers is None:
+        return None
+    elif max_workers < 0:
+        return math.ceil(mp.cpu_count() + max_workers)
+    else:
+        return max_workers
+
+
 def create_basic_pool_executor(
         max_workers=None, *args,
         thread_instead_of_process: bool = False,
         **kwargs,
 ):
-    if max_workers is None or max_workers < 0:
-        max_workers = mp.cpu_count()
+    max_workers = canonicalize_max_workers(max_workers)
     if max_workers == 0:
         et = BasicImmediateExecutor
     elif thread_instead_of_process:
@@ -107,7 +116,7 @@ class PoolExecutor(cf.Executor):
             **kwargs,
     ):
 
-        self._max_workers = max_workers if max_workers is not None and max_workers >= 0 else mp.cpu_count()
+        self._max_workers = canonicalize_max_workers(max_workers)
         self.initializer = initializer
         self.thread_instead_of_process = thread_instead_of_process
 
