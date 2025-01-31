@@ -35,12 +35,19 @@ class VarRegistry(PoolExecutorAddon):
         if var_dict is None:
             var_dict = {}
         self.var_dict = {**var_dict, **kwargs}
+        self.need_to_pickle_var_dict = True
 
     @classmethod
     def get(cls, key):
         return get_var(key)
 
+    def on_start(self) -> None:
+        if not self.executor.is_process_pool_spawn:
+            self.initializer()
+            self.need_to_pickle_var_dict = False
+
     def initializer(self) -> None:
+        # FIXME: this does not work with ThreadPool
         global current_session, var_registry
         if not current_session:
             current_session = uuid4().hex
@@ -55,3 +62,9 @@ class VarRegistry(PoolExecutorAddon):
                 del var_registry[current_session]
             except KeyError:
                 pass
+
+    def __getstate__(self):
+        d = dict(self.__dict__)
+        if self.need_to_pickle_var_dict:
+            d['var_dict'] = None
+        return d
