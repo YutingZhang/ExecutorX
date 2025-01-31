@@ -19,7 +19,7 @@ def start_all_workers(executor: PoolExecutor):
     max_workers = executor.max_workers
     if not max_workers or max_workers < 0:
         return
-    if (executor.is_process_pool_spawn):
+    if executor.is_process_pool_spawn:
         manager = mpm.SyncManager()
         manager.start()
         barrier = manager.Barrier(max_workers)
