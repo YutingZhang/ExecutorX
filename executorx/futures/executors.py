@@ -204,6 +204,9 @@ class PoolExecutor(cf.Executor):
         self.shutdown(wait=True)
         return False
 
+    def __del__(self):
+        self.shutdown(wait=True)
+
 
 class ImmediateExecutor(PoolExecutor):
 
