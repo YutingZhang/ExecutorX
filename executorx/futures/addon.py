@@ -37,6 +37,9 @@ class PoolExecutorAddon:
     def after_join(self) -> None:
         pass
 
+    def after_shutdown(self) -> None:
+        pass
+
     def __getstate__(self):
         state = {k: v for k, v in self.__dict__.items() if k != 'executor'}
         state['executor'] = None

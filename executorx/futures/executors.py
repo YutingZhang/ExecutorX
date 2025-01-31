@@ -184,6 +184,8 @@ class PoolExecutor(cf.Executor):
     def shutdown(self, wait=True, **kwargs):
         rt = self._basic_executor.shutdown(wait=True, **kwargs)
         self.join()
+        for ao in self.addons:
+            ao.after_shutdown()
         return rt
 
     def join(self, timeout=None):

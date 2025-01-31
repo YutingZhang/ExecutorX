@@ -47,7 +47,8 @@ class VarRegistry(PoolExecutorAddon):
         if current_session not in var_registry:
             var_registry[current_session] = self.var_dict
 
-    def after_join(self) -> None:
+    def after_shutdown(self) -> None:
+        # clean up if in main thread
         global current_session, var_registry
         if current_session in var_registry:
             try:
