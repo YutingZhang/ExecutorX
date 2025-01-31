@@ -28,7 +28,9 @@ def create_basic_pool_executor(
         thread_instead_of_process: bool = False,
         **kwargs,
 ):
-    if max_workers is not None and max_workers <= 0:
+    if max_workers is None or max_workers < 0:
+        max_workers = mp.cpu_count()
+    if max_workers == 0:
         et = BasicImmediateExecutor
     elif thread_instead_of_process:
         et = cf.ThreadPoolExecutor
