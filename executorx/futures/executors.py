@@ -28,11 +28,15 @@ __all__ = [
 
 def canonicalize_max_workers(max_workers):
     if max_workers is None:
-        return None
-    elif max_workers < 0:
-        return math.ceil(mp.cpu_count() + max_workers)
+        return mp.cpu_count()
+    elif max_workers <= -1:
+        return max(0, int(mp.cpu_count() + max_workers))
+    elif -1 <= max_workers < 0:
+        return max(0, int(mp.cpu_count() * (1 + max_workers)))
+    elif 0 < max_workers < 1:
+        return int(mp.cpu_count() * max_workers)
     else:
-        return max_workers
+        return int(max_workers)
 
 
 def create_basic_pool_executor(
