@@ -185,7 +185,7 @@ class PoolExecutor(cf.Executor):
     def map(self, fn, *iterables, timeout=None, chunksize=1):
         assert timeout is None, 'timeout is not supported for now'  # FIXME
         assert chunksize == 1, 'chunksize must be 1 for now'  # FIXME
-        futures = deque(self.submit(fn, i) for i in iterables)
+        futures = deque(self.submit(fn, *i) for i in zip(*iterables))
         for f in futures:
             yield f.result()
         # return self._basic_executor.map(fn, *iterables, timeout=timeout, chunksize=chunksize)

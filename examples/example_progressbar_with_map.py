@@ -10,13 +10,14 @@ def func(x):
 
 def main():
     executor = ProcessPoolExecutor(
-        max_workers=0, addons=[
+        max_workers=4, addons=[
             Progress(), VarRegistry(base=100)
         ]
     )
     results = executor.map(func, range(20))
-    executor.join()
+    # executor.join()
     print(list(results))
+    pass
 
 
 if __name__ == '__main__':
