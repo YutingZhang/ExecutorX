@@ -8,6 +8,8 @@ import concurrent.futures as cf
 import functools
 import inspect
 import multiprocessing as mp
+from collections import deque
+
 from .. import threading
 from typing import Union, Optional, Iterable, Callable, List, Dict, Type
 import weakref
@@ -181,7 +183,12 @@ class PoolExecutor(cf.Executor):
         return self._basic_executor.submit(fn, *args, **kwargs)
 
     def map(self, fn, *iterables, timeout=None, chunksize=1):
-        return self._basic_executor.map(fn, *iterables, timeout=timeout, chunksize=chunksize)
+        assert timeout is None, 'timeout is not supported for now'  # FIXME
+        assert chunksize == 1, 'chunksize must be 1 for now'  # FIXME
+        futures = deque(self.submit(fn, i) for i in iterables)
+        for f in futures:
+            yield f.result()
+        # return self._basic_executor.map(fn, *iterables, timeout=timeout, chunksize=chunksize)
 
     def shutdown(self, wait=True, **kwargs):
         rt = self._basic_executor.shutdown(wait=True, **kwargs)
