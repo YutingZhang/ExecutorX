@@ -12,14 +12,19 @@ from executorx.foundation.addon import PoolExecutorAddon
 from executorx.foundation.executor_identifier import get_current_executor_identifier
 
 
-var_registry = dict()
+class _VarRegistry:
+    val = dict()
+
+
+def get_var_registry():
+    return _VarRegistry.val
 
 
 def current_var_registry():
     current_executor_id = get_current_executor_identifier()
-    if current_executor_id not in var_registry:
+    if current_executor_id not in get_var_registry():
         return dict()
-    return var_registry[current_executor_id]
+    return get_var_registry()[current_executor_id]
 
 
 def get_var(key):
@@ -41,22 +46,24 @@ class VarRegistry(PoolExecutorAddon):
     def on_start(self) -> None:
         if not self.executor.is_process_pool_spawn:
             self.need_to_pickle_var_dict = False
-            var_registry[self.executor.identifier] = dict(self.var_dict)
+            get_var_registry()[get_current_executor_identifier()] = dict(self.var_dict)
 
     def initializer(self) -> None:
-        if self.executor.identifier not in var_registry:
-            var_registry[self.executor.identifier] = dict(default=self.var_dict)
+        executor_id = get_current_executor_identifier()
+        if executor_id not in get_var_registry():
+            get_var_registry()[executor_id] = dict(self.var_dict)
 
     def after_shutdown(self) -> None:
         # clean up if in main thread
-        if self.executor.identifier in var_registry:
+        executor_id = get_current_executor_identifier()
+        if executor_id in get_var_registry():
             try:
-                del var_registry[self.executor.identifier]
+                del get_var_registry()[self.executor.identifier]
             except KeyError:
                 pass
 
     def __getstate__(self):
-        d = dict(self.__dict__)
-        if self.need_to_pickle_var_dict:
+        d = super().__getstate__()
+        if not self.need_to_pickle_var_dict:
             d['var_dict'] = None
         return d

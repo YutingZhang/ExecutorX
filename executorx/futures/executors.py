@@ -14,9 +14,12 @@ from collections import deque
 from .. import threading
 from typing import Union, Optional, Iterable, Callable, List, Dict, Type
 import weakref
-from executorx.foundation.addon import PoolExecutorAddon
-from executorx.foundation.executor_identifier import FuncWrapperWithExecutorIdentifier
-from executorx.foundation.basic_immediate_executor import BasicImmediateExecutor
+from ..foundation.addon import PoolExecutorAddon
+from ..foundation.executor_identifier import (
+    FuncWrapperWithExecutorIdentifier,
+    set_current_executor_identifier
+)
+from ..foundation.basic_immediate_executor import BasicImmediateExecutor
 from ..utils import timeout_context_for_lock
 
 __author_ = 'Yuting Zhang'
@@ -137,7 +140,8 @@ class PoolExecutor(cf.Executor):
 
         for ao in self.addons:
             ao.executor = weakref.proxy(self)
-            ao.before_start()
+            with set_current_executor_identifier(self.identifier):
+                ao.before_start()
 
         self._task_tracker = _TaskTracker()
         self._submit_lock = threading.Lock()
@@ -156,8 +160,10 @@ class PoolExecutor(cf.Executor):
             **kwargs
         )
 
-        for ao in self.addons:
-            ao.on_start()
+        with set_current_executor_identifier(self.identifier):
+            for ao in self.addons:
+                ao.on_start()
+        self.is_running = True
 
     @property
     def max_workers(self) -> int:
@@ -201,15 +207,17 @@ class PoolExecutor(cf.Executor):
 
     def submit(self, fn: Callable, /, *args, **kwargs) -> cf.Future:
         with self._submit_lock:
-            for ao in self.addons:
-                ao.before_submit()
+            with set_current_executor_identifier(self.identifier):
+                for ao in self.addons:
+                    ao.before_submit()
             wrapped_fn = FuncWrapperWithExecutorIdentifier(fn, self.identifier)
             f = self._basic_executor.submit(
                 wrapped_fn, *args, **kwargs
             )
             self._task_tracker.after_submit(f)
-            for ao in self.addons[::-1]:
-                ao.after_submit(f)
+            with set_current_executor_identifier(self.identifier):
+                for ao in self.addons[::-1]:
+                    ao.after_submit(f)
             return f
 
     def basic_submit(self, fn: Callable, /, *args, **kwargs) -> cf.Future:
@@ -224,18 +232,24 @@ class PoolExecutor(cf.Executor):
         # return self._basic_executor.map(fn, *iterables, timeout=timeout, chunksize=chunksize)
 
     def shutdown(self, wait=True, **kwargs):
+        if 'is_running' not in self.__dict__ or not self.is_running:
+            return
         rt = self._basic_executor.shutdown(wait=True, **kwargs)
         self.join()
-        for ao in self.addons:
-            ao.after_shutdown()
+        self.is_running = False
+        with set_current_executor_identifier(self.identifier):
+            for ao in self.addons:
+                ao.after_shutdown()
         return rt
 
     def join(self, timeout=None):
-        for ao in self.addons:
-            ao.before_join()
+        with set_current_executor_identifier(self.identifier):
+            for ao in self.addons:
+                ao.before_join()
         self._task_tracker.join(timeout=timeout)
-        for ao in self.addons:
-            ao.after_join()
+        with set_current_executor_identifier(self.identifier):
+            for ao in self.addons:
+                ao.after_join()
 
     def __enter__(self):
         return self
