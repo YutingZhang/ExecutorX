@@ -9,8 +9,8 @@ def func(x):
     return a
 
 def main():
-    executor = ProcessPoolExecutor(
-        max_workers=4, addons=[
+    executor = ThreadPoolExecutor(
+        max_workers=0, addons=[
             Progress(), VarRegistry(base=100)
         ]
     )

@@ -58,7 +58,7 @@ class VarRegistry(PoolExecutorAddon):
         executor_id = get_current_executor_identifier()
         if executor_id in get_var_registry():
             try:
-                del get_var_registry()[self.executor.identifier]
+                del get_var_registry()[executor_id]
             except KeyError:
                 pass
 
