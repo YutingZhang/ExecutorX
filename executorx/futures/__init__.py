@@ -16,8 +16,6 @@ import concurrent.futures as _concurrent_futures
 from concurrent.futures import *
 BasicProcessPoolExecutor = ProcessPoolExecutor
 BasicThreadPoolExecutor = ThreadPoolExecutor
-from .addon import *
-from .basic_immediate_executor import BasicImmediateExecutor, ImmediateFuture
 from .executors import *
 from .executors import ProcessPoolExecutor, ThreadPoolExecutor
 from .start_all_workers import *

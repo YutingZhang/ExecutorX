@@ -9,7 +9,7 @@ from .. import threading
 from concurrent.futures import Future
 import concurrent.futures as cf
 from typing import Optional
-from ..futures.addon import PoolExecutorAddon
+from executorx.foundation.addon import PoolExecutorAddon
 from ..futures.executors import BasicImmediateExecutor
 
 

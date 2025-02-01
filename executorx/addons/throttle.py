@@ -4,7 +4,7 @@
 from concurrent.futures import Future
 from .. import threading
 from typing import Union
-from ..futures.addon import PoolExecutorAddon
+from executorx.foundation.addon import PoolExecutorAddon
 
 
 class Throttle(PoolExecutorAddon):

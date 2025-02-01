@@ -7,14 +7,13 @@ __all__ = ['PoolExecutorAddon']
 
 from typing import Optional
 from concurrent.futures import Future, Executor
-from weakref import ProxyType
 
 
 class PoolExecutorAddon:
 
     def __init__(self):
-        from .executors import PoolExecutor
-        self.executor: Optional[ProxyType[PoolExecutor]] = None
+        from ..futures.executors import PoolExecutor
+        self.executor: Optional[PoolExecutor] = None
 
     def before_start(self) -> None:
         pass

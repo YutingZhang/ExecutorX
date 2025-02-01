@@ -8,21 +8,18 @@ __all__ = [
 ]
 
 
-from uuid import uuid4
-from ..futures.addon import PoolExecutorAddon
-
-_worker_ids = dict()
+from executorx.foundation.addon import PoolExecutorAddon
+from executorx.foundation.executor_identifier import get_current_executor_identifier
 
 
-current_session = None
 var_registry = dict()
 
 
 def current_var_registry():
-    global current_session, var_registry
-    if current_session not in var_registry:
+    current_executor_id = get_current_executor_identifier()
+    if current_executor_id not in var_registry:
         return dict()
-    return var_registry[current_session]
+    return var_registry[current_executor_id]
 
 
 def get_var(key):
@@ -43,23 +40,18 @@ class VarRegistry(PoolExecutorAddon):
 
     def on_start(self) -> None:
         if not self.executor.is_process_pool_spawn:
-            self.initializer()
             self.need_to_pickle_var_dict = False
+            var_registry[self.executor.identifier] = dict(self.var_dict)
 
     def initializer(self) -> None:
-        # FIXME: this does not work with ThreadPool
-        global current_session, var_registry
-        if not current_session:
-            current_session = uuid4().hex
-        if current_session not in var_registry:
-            var_registry[current_session] = self.var_dict
+        if self.executor.identifier not in var_registry:
+            var_registry[self.executor.identifier] = dict(default=self.var_dict)
 
     def after_shutdown(self) -> None:
         # clean up if in main thread
-        global current_session, var_registry
-        if current_session in var_registry:
+        if self.executor.identifier in var_registry:
             try:
-                del var_registry[current_session]
+                del var_registry[self.executor.identifier]
             except KeyError:
                 pass
 

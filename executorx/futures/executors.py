@@ -7,15 +7,16 @@ __author__ = ['Yuting Zhang']
 import concurrent.futures as cf
 import functools
 import inspect
-import math
 import multiprocessing as mp
+import uuid
 from collections import deque
 
 from .. import threading
 from typing import Union, Optional, Iterable, Callable, List, Dict, Type
 import weakref
-from .addon import PoolExecutorAddon
-from .basic_immediate_executor import BasicImmediateExecutor
+from executorx.foundation.addon import PoolExecutorAddon
+from executorx.foundation.executor_identifier import FuncWrapperWithExecutorIdentifier
+from executorx.foundation.basic_immediate_executor import BasicImmediateExecutor
 from ..utils import timeout_context_for_lock
 
 __author_ = 'Yuting Zhang'
@@ -119,6 +120,7 @@ class PoolExecutor(cf.Executor):
             addons: _ADDON_ARG_TYPE_HINT = None,
             **kwargs,
     ):
+        self.identifier = uuid.uuid4().hex
 
         self._max_workers = canonicalize_max_workers(max_workers)
         self.initializer = initializer
@@ -144,7 +146,9 @@ class PoolExecutor(cf.Executor):
             all_initializers = tuple(ao.initializer for ao in addons)
             if initializer is not None:
                 all_initializers += (initializer,)
-            initializer = _FuncWithPreFuncs(*all_initializers)
+            initializer = FuncWrapperWithExecutorIdentifier(
+                _FuncWithPreFuncs(*all_initializers), self.identifier
+            )
 
         self._basic_executor = create_basic_pool_executor(
             max_workers, thread_instead_of_process=thread_instead_of_process,
@@ -172,6 +176,19 @@ class PoolExecutor(cf.Executor):
         return self._task_tracker.total_task_count
 
     @property
+    def is_thread_pool(self) -> bool:
+        return (
+            isinstance(self.basic_executor, cf.ThreadPoolExecutor)
+        )
+
+    @property
+    def is_process_pool_fork(self) -> bool:
+        return (
+            isinstance(self.basic_executor, cf.ProcessPoolExecutor) and
+            isinstance(self.basic_executor._mp_context, mp.context.ForkContext)
+        )
+
+    @property
     def is_process_pool_spawn(self) -> bool:
         return (
             isinstance(self.basic_executor, cf.ProcessPoolExecutor) and
@@ -186,7 +203,10 @@ class PoolExecutor(cf.Executor):
         with self._submit_lock:
             for ao in self.addons:
                 ao.before_submit()
-            f = self._basic_executor.submit(fn, *args, **kwargs)
+            wrapped_fn = FuncWrapperWithExecutorIdentifier(fn, self.identifier)
+            f = self._basic_executor.submit(
+                wrapped_fn, *args, **kwargs
+            )
             self._task_tracker.after_submit(f)
             for ao in self.addons[::-1]:
                 ao.after_submit(f)

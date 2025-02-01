@@ -134,7 +134,7 @@ Addons provide modular hooks into the executor lifecycle, allowing custom logic 
 ### Creating a Custom Addon
 
 ```python
-from executorx.futures.addon import PoolExecutorAddon
+from executorx.foundation.addon import PoolExecutorAddon
 
 
 class MyCustomAddon(PoolExecutorAddon):

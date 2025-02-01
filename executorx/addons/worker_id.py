@@ -12,7 +12,7 @@ __all__ = [
 import multiprocessing
 import os
 from .. import threading
-from ..futures.addon import PoolExecutorAddon
+from executorx.foundation.addon import PoolExecutorAddon
 
 _worker_ids = dict()
 
