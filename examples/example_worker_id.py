@@ -12,7 +12,7 @@ def func(x):
 
 def main():
     executor = ProcessPoolExecutor(
-        max_workers=2, addons=[
+        max_workers=0, addons=[
             WorkerId
         ]
     )
